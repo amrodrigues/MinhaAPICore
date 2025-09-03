@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace MinhaAPIcore.Controllers
 {
+    [ApiConventionType(typeof(DefaultApiConventions))]
     [Route("api/[controller]")]
   
     public class ValuesController : MainController
@@ -34,7 +35,7 @@ namespace MinhaAPIcore.Controllers
 
 
         [HttpGet("obter-valores")]
-        public <IEnumerable<string> ObterValores()
+        public IEnumerable<string> ObterValores()
         {
             var valores = new string[] { "valor1", "valor2" };
             if (valores.Length < 5000)
@@ -49,7 +50,7 @@ namespace MinhaAPIcore.Controllers
         {
             return "value";
         }
-
+        [ApiConventionMethod(typeof(DefaultApiConventions), nameof(DefaultApiConventions.Post))]
         // POST api/values
         [HttpPost]
         [ProducesResponseType(typeof(Product), StatusCodes.Status201Created)]
@@ -64,8 +65,13 @@ namespace MinhaAPIcore.Controllers
 
         // PUT api/values/5
         [HttpPut("{id}")]
-        public void Put([FromRoute] int id, [FromForm] Product value)
+        public ActionResult Put([FromRoute] int id, [FromForm] Product product)
         {
+            if(!ModelState.IsValid) return BadRequest();
+
+            if(id != product.Id) return NotFound();
+
+            return Ok(product);
         }
 
         // DELETE api/values/5
@@ -88,7 +94,7 @@ namespace MinhaAPIcore.Controllers
                     success = true,
                     data = result
                 });
-            });
+            };
             return BadRequest(error: new
             {
                 success = false,
